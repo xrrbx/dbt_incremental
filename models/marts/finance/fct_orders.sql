@@ -1,3 +1,9 @@
+{{
+    config(
+        materialized = 'incremental'
+    )
+}}
+
 with payments as (
     select
         *
@@ -31,3 +37,8 @@ select
 from
     orders
     left join order_payments using (order_id)
+
+{% if is_incremental() %}
+    --this filter will only be applied on an incremental run
+    where order_date > (select max(order_date) from {{ this }})
+{% endif %}
